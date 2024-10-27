@@ -41,18 +41,32 @@ static int lept_parse_number(lept_context* c, lept_value* v) {
     const char *p = c->json;
     if(*p == '-')
         ++p;
-    
-    if(ISDIGIT1TO9(*p)) {
-        while(ISDIGIT(*p)) {
-            p++;
-        }
-        if(*p == '.' && !ISDIGIT(p[1])) {
-            return LEPT_PARSE_INVALID_VALUE;
-        }
-    } else {
+
+    if(*p == '0') {
         if(p[1] != 'E' && p[1] != 'e' && p[1] != '.' && p[1] != '\0') {
             return LEPT_PARSE_ROOT_NOT_SINGULAR;
         }
+        ++p;
+    } else {
+        while(ISDIGIT(*p))
+            ++p;
+    }
+
+    if(*p == '.') {
+        if(!ISDIGIT(p[1]))
+            return LEPT_PARSE_INVALID_VALUE;
+        ++p;
+        while(ISDIGIT(*p))
+            ++p;
+    }
+
+    if(*p == 'e' || *p == 'E') {
+        if(p[1] != '+' && p[1] != '-' && !ISDIGIT(p[1]))
+            return LEPT_PARSE_INVALID_VALUE;
+        if(p[1] == '+' || p[1] == '-')
+            ++p;
+        while(ISDIGIT(*p))
+            ++p;
     }
 
     const char* end;
